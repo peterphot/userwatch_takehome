@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+<head>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        function search_horse_callback(selection) {
+            $.getJSON({
+                url: "/search_horse", data: { 'data': selection }, success: function (result) {
+                    Plotly.newPlot('chart', result, {staticPlot: true});;
+                }
+            });
+        }
+    </script>
+</head>
+
+<body style="font-family:arial, sans-serif">
+<h1>Horse analytics</h1>
+<h2>Choose your horse</h2>
+<p>To select a horse type in the horse ID</p>
+<body>A horse ID is any number between 0 and 358847. The best horses are 91403 and 33018.</body>
+<br>
+<input type="number" id="fname" name="fname" onchange="search_horse_callback(this.value)">
+<div id="chart" class="chart"></div>
+</body>
+
+<script>
+    d = {{ graphJSON | safe }};
+    //d.config={staticPlot: true};
+    Plotly.newPlot('chart', d, {});
+</script>
+</html>
