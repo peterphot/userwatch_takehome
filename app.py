@@ -30,22 +30,25 @@ def race_data():
     return render_template('races.html')  # ,  graphJSON=gm()
 
 
+def run_horse_query(horse_id, conn):
+    return pd.read_sql_query(f'select * from horses where horse_id = {horse_id}', conn)
+
+
 def show_horse_summary_table(horse_id=91403):
     horse_id = int(horse_id)
     assert (horse_id >= 0) and (horse_id <= 358847), 'Horse ID must be an integer between 0 and 358847'
 
     if app.debug:
         print('debug')
-        horse_df = pd.read_csv('data/horse_db.csv').query(f'horse_id == {horse_id}')
+        conn = psycopg2.connect(host='singapore-postgres.render.com', database='zed_0t9u', user='zed_user',
+                                password=os.environ.get('render_postgress_pw'))
     else:
         print('not debug')
         with open('/etc/secrets/POSTGRES_CONN_STRING') as f:
             con_string = f.readlines()
-            
-        print(con_string)
-        # conn = psycopg2.connect()
+        conn = psycopg2.connect(con_string[0])
 
-
+    horse_df = run_horse_query(horse_id, conn)
 
     fig = go.Figure(data=[go.Table(
         header=dict(values=list(horse_df.columns),
