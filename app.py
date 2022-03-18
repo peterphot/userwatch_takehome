@@ -39,7 +39,9 @@ def show_horse_summary_table(horse_id=91403):
         horse_df = pd.read_csv('data/horse_db.csv').query(f'horse_id == {horse_id}')
     else:
         print('not debug')
-        con_string = os.environ('POSTGRES_CONN_STRING')
+        with open('/etc/secrets/POSTGRES_CONN_STRING') as f:
+            con_string = f.readlines()
+            
         print(con_string)
         # conn = psycopg2.connect()
 
