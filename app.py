@@ -4,6 +4,8 @@ import json
 import plotly
 import plotly.express as px
 import plotly.graph_objects as go
+import psycopg2
+import os
 
 app = Flask(__name__)
 
@@ -32,7 +34,16 @@ def show_horse_summary_table(horse_id=91403):
     horse_id = int(horse_id)
     assert (horse_id >= 0) and (horse_id <= 358847), 'Horse ID must be an integer between 0 and 358847'
 
-    horse_df = pd.read_csv('data/horse_db.csv').query(f'horse_id == {horse_id}')
+    if app.debug:
+        print('debug')
+        horse_df = pd.read_csv('data/horse_db.csv').query(f'horse_id == {horse_id}')
+    else:
+        print('not debug')
+        con_string = os.environ('POSTGRES_CONN_STRING')
+        print(con_string)
+        # conn = psycopg2.connect()
+
+
 
     fig = go.Figure(data=[go.Table(
         header=dict(values=list(horse_df.columns),
