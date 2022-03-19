@@ -6,8 +6,18 @@
     <script>
         function search_horse_callback(selection) {
             $.getJSON({
-                url: "/search_horse", data: { 'data': selection }, success: function (result) {
-                    Plotly.newPlot('chart', result, {staticPlot: true});;
+                url: "/search_horse", data: { 'horse_id': selection }, success: function (result) {
+                    Plotly.newPlot('summary_table', result, {staticPlot: true});
+                }
+            });
+        }
+    </script>
+    <script>
+        function show_start_gates_callback() {
+            var horse_id = document.getElementById("horse_id_field").value;
+            $.getJSON({
+                url: "/show_start_gates", data: { 'horse_id': horse_id }, success: function (result) {
+                    Plotly.newPlot('selected_vis', result, {staticPlot: true});;
                 }
             });
         }
@@ -20,13 +30,18 @@
 <p>To select a horse type in the horse ID</p>
 <body>A horse ID is any number between 0 and 358847. The best horses are 91403 and 33018.</body>
 <br>
-<input type="number" id="fname" name="fname" onchange="search_horse_callback(this.value)">
-<div id="chart" class="chart"></div>
-</body>
-
+<input type="number" id="horse_id_field" name="horse_id_field" onchange="search_horse_callback(this.value)">
+<body>
+<div id="summary_table" class="chart"></div>
 <script>
-    d = {{ graphJSON | safe }};
-    //d.config={staticPlot: true};
-    Plotly.newPlot('chart', d, {});
+    d = {{ summary_table | safe }};
+    Plotly.newPlot('summary_table', d, {});
 </script>
+<button type="button" onclick="show_start_gates_callback()">Show start gate histogram</button>
+<div id="selected_vis" class="chart"></div>
+<script>
+    sha = {{ selectedHorseVis | safe }};
+    Plotly.newPlot('selected_vis', sha, {});
+</script>
+</body>
 </html>
