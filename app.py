@@ -164,7 +164,8 @@ def horse_data():
     horse_id = 91403
     query = f'select * from horses where horse_id = {horse_id}'
     return render_template('horses.html', summary_table=show_horse_visuals(horse_id, 'table', query,
-                                                                           None, None, 'Horse info'))
+                                                                           None, None, 'Horse info'),
+                                                                           jitsu_key=get_jitsu_key())
 
 
 @app.route('/races')
@@ -175,7 +176,7 @@ def race_data():
     race_df = pd.read_sql_query('select distinct class from races_info', conn)
     return render_template('races.html', countries=country_df.values.tolist(),
                            classes=race_df.values.tolist(),
-                           distances=distance_df.values.tolist())
+                           distances=distance_df.values.tolist(), jitsu_key=get_jitsu_key())
 
 
 # Horse Visuals
