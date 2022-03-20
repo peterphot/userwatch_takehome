@@ -22,6 +22,46 @@
             });
         }
     </script>
+    <script>
+        function show_places_callback() {
+            var horse_id = document.getElementById("horse_id_field").value;
+            $.getJSON({
+                url: "/show_places", data: { 'horse_id': horse_id }, success: function (result) {
+                    Plotly.newPlot('selected_vis', result, {staticPlot: true});;
+                }
+            });
+        }
+    </script>
+    <script>
+        function show_class_callback() {
+            var horse_id = document.getElementById("horse_id_field").value;
+            $.getJSON({
+                url: "/show_classes", data: { 'horse_id': horse_id }, success: function (result) {
+                    Plotly.newPlot('selected_vis', result, {staticPlot: true});;
+                }
+            });
+        }
+    </script>
+    <script>
+        function show_distances_callback() {
+            var horse_id = document.getElementById("horse_id_field").value;
+            $.getJSON({
+                url: "/show_distances", data: { 'horse_id': horse_id }, success: function (result) {
+                    Plotly.newPlot('selected_vis', result, {staticPlot: true});;
+                }
+            });
+        }
+    </script>
+    <script>
+        function show_earnings_callback() {
+            var horse_id = document.getElementById("horse_id_field").value;
+            $.getJSON({
+                url: "/show_earnings", data: { 'horse_id': horse_id }, success: function (result) {
+                    Plotly.newPlot('selected_vis', result, {staticPlot: true});;
+                }
+            });
+        }
+    </script>
 </head>
 
 <body style="font-family:arial, sans-serif">
@@ -37,11 +77,16 @@
     d = {{ summary_table | safe }};
     Plotly.newPlot('summary_table', d, {});
 </script>
+
 <button type="button" onclick="show_start_gates_callback()">Show start gate data</button>
 <button type="button" onclick="show_places_callback()">Show places data</button>
+
+<button type="button" onclick="show_class_callback()">Show race class data</button>
+<button type="button" onclick="show_distances_callback()">Show race distance data</button>
+<button type="button" onclick="show_earnings_callback()">Show earnings data</button>
 <div id="selected_vis" class="chart"></div>
 <script>
-    sha = {{ selectedHorseVis | safe }};
+    sha = {{ selected_horse_vis | safe }};
     Plotly.newPlot('selected_vis', sha, {});
 </script>
 </body>

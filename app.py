@@ -30,12 +30,95 @@ def get_db_conn():
 
 @app.route('/search_horse', methods=['POST', 'GET'])
 def search_horse_callback():
-    return show_horse_summary_table(request.args.get('horse_id'))
+    horse_id = request.args.get('horse_id')
+    query = f'select * from horses where horse_id = {horse_id}'
+    return show_horse_visuals(horse_id, 'table', query, None, None, 'Horse info')
 
 
 @app.route('/show_start_gates', methods=['POST', 'GET'])
 def show_start_gates_callback():
-    return show_start_gates(request.args.get('horse_id'))
+    horse_id = request.args.get('horse_id')
+    query = f"""
+            select
+                gate
+                , number_of_starts
+            from gate_summary
+            where True
+                and horse_id = {horse_id}
+    """
+    return show_horse_visuals(horse_id,
+                              'bar_chart', query, 'gate',
+                              'number_of_starts', 'Number of races started from each gate')
+
+
+@app.route('/show_places', methods=['POST', 'GET'])
+def show_places_callback():
+    horse_id = request.args.get('horse_id')
+    query = f"""
+            select
+                place
+                , number_of_places
+            from place_summary
+            where True
+                and horse_id = {horse_id}
+            order by 1 asc
+    """
+    return show_horse_visuals(horse_id,
+                              'bar_chart', query, 'place',
+                              'number_of_places', 'Number of places')
+
+
+@app.route('/show_classes', methods=['POST', 'GET'])
+def show_classes_callback():
+    horse_id = request.args.get('horse_id')
+    query = f"""
+        select
+            class
+            , sum(n_races) as n_races
+        from class_distance_summary
+        where True
+            and horse_id = {horse_id}
+        group by 1
+        order by 1 asc
+    """
+    return show_horse_visuals(horse_id,
+                              'bar_chart', query, 'class',
+                              'n_races', 'Number of races per class')
+
+
+@app.route('/show_distances', methods=['POST', 'GET'])
+def show_distances_callback():
+    horse_id = request.args.get('horse_id')
+    query = f"""
+        select
+            distance
+            , sum(n_races) as n_races
+        from class_distance_summary
+        where True
+            and horse_id = {horse_id}
+        group by 1
+        order by 1 asc
+    """
+    return show_horse_visuals(horse_id,
+                              'bar_chart', query, 'distance',
+                              'n_races', 'Number of races per distance')
+
+
+@app.route('/show_earnings', methods=['POST', 'GET'])
+def show_earnings_callback():
+    horse_id = request.args.get('horse_id')
+    query = f"""
+        select
+            horse_id
+            , earnings
+            , entry_fees
+            , earnings - entry_fees as net_profit
+        from earnings_summary
+        where True
+            and horse_id = {horse_id}
+    """
+    return show_horse_visuals(horse_id, 'table', query, None, None, 'Earnings summary (values are in ETH)')
+
 
 
 # Pages
@@ -48,7 +131,10 @@ def index():
 
 @app.route('/horses')
 def horse_data():
-    return render_template('horses.html', summary_table=show_horse_summary_table())#, selectedHorseVis=show_start_gates()
+    horse_id = 91403
+    query = f'select * from horses where horse_id = {horse_id}'
+    return render_template('horses.html', summary_table=show_horse_visuals(horse_id, 'table', query,
+                                                                           None, None, 'Horse info'))
 
 
 @app.route('/races')
@@ -63,58 +149,34 @@ def run_horse_query(horse_id, conn):
     return pd.read_sql_query(f'select * from horses where horse_id = {horse_id}', conn)
 
 
-def show_horse_summary_table(horse_id=91403):
+def show_horse_visuals(horse_id, vis_type, query, x_col, y_col, fig_title):
     horse_id = int(horse_id)
     assert (horse_id >= 0) and (horse_id <= 358847), 'Horse ID must be an integer between 0 and 358847'
 
     conn = get_db_conn()
 
     horse_df = run_horse_query(horse_id, conn)
-
-    fig = go.Figure(data=[go.Table(
-        header=dict(values=list(horse_df.columns),
-                    fill_color='paleturquoise',
-                    align='left'),
-        cells=dict(values=[horse_df[c] for c in horse_df.columns],
-                   fill_color='lavender',
-                   align='left'))
-    ])
-
-    summary_table = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-
-    # print(fig.data[0])
-    # fig.data[0]['staticPlot']=True
-    print('sum done')
-    return summary_table
-
-
-def show_start_gates(horse_id=91403):
-    horse_id = int(horse_id)
-    assert (horse_id >= 0) and (horse_id <= 358847), 'Horse ID must be an integer between 0 and 358847'
-
-    conn = get_db_conn()
-
-    horse_df = run_horse_query(horse_id, conn)
-
-    query = f"""
-    select
-        gate
-        , number_of_starts
-    from gate_summary
-    where True
-        and horse_id = {horse_id}
-    """
-    gate_df = pd.read_sql_query(query, conn)
-
+    vis_df = pd.read_sql_query(query, conn)
     horse_name = horse_df.loc[0, 'name']
 
-    fig = px.bar(gate_df, x='gate', y='number_of_starts',
-                 title=f'Number of races started from each gate for {horse_name} (horse_id:{horse_id})',
-                 labels={
-                     "gate": "Start gate",
-                     "number_of_starts": "Number of Starts"})
-    fig.update_xaxes(type='category')
+    if vis_type == 'table':
+        fig = go.Figure(data=[go.Table(
+            header=dict(values=list(vis_df.columns),
+                        fill_color='paleturquoise',
+                        align='left'),
+            cells=dict(values=[vis_df[c] for c in vis_df.columns],
+                       fill_color='lavender',
+                       align='left'))
+        ])
+        fig.update_layout(title=f'{fig_title} for {horse_name} (horse_id:{horse_id})')
+    elif vis_type == 'bar_chart':
+        fig = px.bar(vis_df, x=x_col, y=y_col,
+                     title=f'{fig_title} for {horse_name} (horse_id:{horse_id})',
+                     # labels={
+                     #     "gate": "Start gate",
+                     #     "number_of_starts": "Number of Starts"}
+                     )
+        fig.update_xaxes(type='category')
+    return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
-    startGateVis = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-    print('gate done')
-    return startGateVis
+#%%
