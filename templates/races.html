@@ -1,0 +1,107 @@
+<!doctype html>
+<html>
+<head>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
+    <script>
+            function load_selections(country) {
+                    console.log(country);
+                    $.ajax({
+                        url: "/populate_cities_dropdown",
+                        method: "POST",
+                        data: { country: country },
+                        dataType: "json",
+                        success: function (data) { //alert(country)
+                            var html = "";
+                            html += '<option selected="selected" value=""></option>'
+                            for (var count = 0; count < data.length; count++) {
+                                html += '<option value="' + data[count].city + '">' + data[count].city + "</option>";
+                            }
+                            $("#cities").html(html);
+                        },
+                    });
+                }
+    </script>
+    <script>
+            function search_race_info() {
+            var country = document.getElementById("country").value;
+            var city = document.getElementById("cities").value;
+            var race_class = document.getElementById("class").value;
+            var distance = document.getElementById("distance").value;
+            $.getJSON({
+                url: "/search_race_info", data: { 'country': country, 'city': city, 'class':race_class, 'distance':distance }, success: function (result) {
+                    Plotly.newPlot('race_table', result, {staticPlot: true});
+                }
+            });
+        }
+    </script>
+    <script>
+            function search_individual_race_result() {
+            var race_id = document.getElementById("race_id_field").value;
+            $.getJSON({
+                url: "/search_race_result", data: { 'race_id': race_id }, success: function (result) {
+                    Plotly.newPlot('individual_race_table', result, {staticPlot: true});
+                }
+            });
+        }
+    </script>
+
+    <title>Races</title>
+</head>
+<body>
+    <h1>Race information</h1>
+        <label>Select Country</label>
+        <select name="country" id="country" title="Select Country" onchange="load_selections(this.value)" value="">
+            <option selected="selected" value=""></option>
+            {% for row in countries %}
+                <option value="{{row[0]}}">{{row[0]}}</option>
+            {% endfor %}
+        </select>
+
+        <br><br>
+
+        <label>Select City</label>
+        <select name="cities" id="cities" class="form-control" title="Select City"> </select>
+
+        <br><br>
+
+        <label>Select Race Distance</label>
+        <select name="distance" id="distance" title="Select Distance">
+            <option selected="selected" value=""></option>
+            {% for row in distances %}
+                <option value="{{row[0]}}">{{row[0]}}</option>
+            {% endfor %}
+        </select>
+
+        <br><br>
+        <label>Select Race Class</label>
+        <select name="class" id="class" title="Select Class">
+            <option selected="selected" value=""></option>
+            {% for row in classes %}
+                <option value="{{row[0]}}">{{row[0]}}</option>
+            {% endfor %}
+        </select>
+
+        <br><br>
+
+        <button type="button" onclick="search_race_info()" >Search Races</button>
+
+        <div id="race_table" class="chart"></div>
+        <script>
+            d = {{ race_table | safe }};
+            Plotly.newPlot('race_table', d, {});
+        </script>
+
+        <h2> Search Race Results</h2>
+        <input type="text" id="race_id_field" name="race_id_field">
+        <button type="button" onclick="search_individual_race_result()" >Search Race Result</button>
+        <div id="individual_race_table" class="chart"></div>
+        <script>
+                d = {{ individual_race_table | safe }};
+                Plotly.newPlot('individual_race_table', d, {});
+        </script>
+</body>
+</html>

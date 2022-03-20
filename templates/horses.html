@@ -65,29 +65,30 @@
 </head>
 
 <body style="font-family:arial, sans-serif">
-<h1>Horse analytics</h1>
-<h2>Choose your horse</h2>
-<p>To select a horse type in the horse ID</p>
-<body>A horse ID is any number between 0 and 358847. The best horses are 91403 and 33018.</body>
-<br>
-<input type="number" id="horse_id_field" name="horse_id_field" onchange="search_horse_callback(this.value)", value=91403>
-<body>
-<div id="summary_table" class="chart"></div>
-<script>
-    d = {{ summary_table | safe }};
-    Plotly.newPlot('summary_table', d, {});
-</script>
+    <h1>Horse analytics</h1>
+    <h2>Choose your horse</h2>
+    <p>To select a horse type in the horse ID</p>
+    <body>A horse ID is any number between 0 and 358847. The best horses are 91403 and 33018.</body>
+    <br>
+    <input type="number" id="horse_id_field" name="horse_id_field" onchange="search_horse_callback(this.value)", value=91403>
+    <body>
+    <div id="summary_table" class="chart"></div>
+    <script>
+        d = {{ summary_table | safe }};
+        Plotly.newPlot('summary_table', d, {});
+    </script>
 
-<button type="button" onclick="show_start_gates_callback()">Show start gate data</button>
-<button type="button" onclick="show_places_callback()">Show places data</button>
+    <button type="button" onclick="show_start_gates_callback()">Show start gate data</button>
+    <button type="button" onclick="show_places_callback()">Show places data</button>
 
-<button type="button" onclick="show_class_callback()">Show race class data</button>
-<button type="button" onclick="show_distances_callback()">Show race distance data</button>
-<button type="button" onclick="show_earnings_callback()">Show earnings data</button>
-<div id="selected_vis" class="chart"></div>
-<script>
-    sha = {{ selected_horse_vis | safe }};
-    Plotly.newPlot('selected_vis', sha, {});
-</script>
+    <button type="button" onclick="show_class_callback()">Show race class data</button>
+    <button type="button" onclick="show_distances_callback()">Show race distance data</button>
+    <button type="button" onclick="show_earnings_callback()">Show earnings data</button>
+    <div id="selected_vis" class="chart"></div>
+
+    <script>
+        sha = {{ selected_horse_vis | safe }};
+        Plotly.newPlot('selected_vis', sha, {});
+    </script>
 </body>
 </html>

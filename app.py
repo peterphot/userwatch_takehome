@@ -1,4 +1,4 @@
-from flask import Flask, config, render_template, request
+from flask import Flask, render_template, request, jsonify
 import pandas as pd
 import json
 import plotly
@@ -24,6 +24,16 @@ def get_db_conn():
             con_string = f.readlines()
         return psycopg2.connect(con_string[0])
 
+
+@app.route("/populate_cities_dropdown", methods=["POST", "GET"])
+def populate_cities_dropdown():
+    print('pop')
+    if request.method == 'POST':
+        country = request.form['country']
+        print(country)
+        conn = get_db_conn()
+        country_df = pd.read_sql_query(f"select distinct city from countries where country = '{country}'", conn)
+        return jsonify([{c[0]: c[1][0]} for c in zip(['city']*len(country_df.values), country_df.values.tolist())])
 
 # Callbacks
 
@@ -118,6 +128,20 @@ def show_earnings_callback():
     return show_horse_visuals(horse_id, 'table', query, None, None, 'Earnings summary (values are in ETH)')
 
 
+@app.route('/search_race_info', methods=['POST', 'GET'])
+def search_race_info_callback():
+    country = request.args.get('country')
+    city = request.args.get('city')
+    race_class = request.args.get('class')
+    distance = request.args.get('distance')
+    return show_race_info(country, city, race_class, distance)
+
+
+@app.route('/search_race_result', methods=['POST', 'GET'])
+def search_race_result_callback():
+    race_id = request.args.get('race_id')
+    return show_race_result(race_id)
+
 
 # Pages
 
@@ -137,7 +161,13 @@ def horse_data():
 
 @app.route('/races')
 def race_data():
-    return render_template('races.html')  # ,  graphJSON=gm()
+    conn = get_db_conn()
+    country_df = pd.read_sql_query('select distinct country from countries', conn)
+    distance_df = pd.read_sql_query('select distinct distance from races_info', conn)
+    race_df = pd.read_sql_query('select distinct class from races_info', conn)
+    return render_template('races.html', countries=country_df.values.tolist(),
+                           classes=race_df.values.tolist(),
+                           distances=distance_df.values.tolist())
 
 
 # Horse Visuals
@@ -177,4 +207,67 @@ def show_horse_visuals(horse_id, vis_type, query, x_col, y_col, fig_title):
         fig.update_xaxes(type='category')
     return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
+
+def show_race_info(country, city, race_class, distance):
+    conn = get_db_conn()
+
+    query = f"""
+        select
+            *
+        from races_info
+        where True
+    """
+    if country != "":
+        query = query + f"and country = '{country}'\n"
+    if city != "":
+        query = query + f"and city = '{city}'\n"
+    if distance != "":
+        query = query + f"and class = '{race_class}'\n"
+    if race_class != "":
+        query = query + f"and distance = '{distance}'\n"
+
+    query = query + "limit 100"
+    vis_df = pd.read_sql_query(query, conn)
+
+    fig = go.Figure(data=[go.Table(
+        header=dict(values=list(vis_df.columns),
+                    fill_color='paleturquoise',
+                    align='left'),
+        cells=dict(values=[vis_df[c] for c in vis_df.columns],
+                   fill_color='lavender',
+                   align='left'))
+    ])
+    fig.update_layout(title=f'Showing 100 races in {country}, {city}', height=1000)
+
+    return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+def show_race_result(race_id):
+    conn = get_db_conn()
+
+    query = f"""
+        select
+            name
+            , horse_id
+            , stable_name
+            , place
+            , gate
+        from race_results
+        where True
+            and race_id = '{race_id}'
+        order by 4 asc
+    """
+
+    vis_df = pd.read_sql_query(query, conn)
+
+    fig = go.Figure(data=[go.Table(
+        header=dict(values=list(vis_df.columns),
+                    fill_color='paleturquoise',
+                    align='left'),
+        cells=dict(values=[vis_df[c] for c in vis_df.columns],
+                   fill_color='lavender',
+                   align='left'))
+    ])
+    fig.update_layout(title=f'Showing race result for {race_id}')
+
+    return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 #%%
