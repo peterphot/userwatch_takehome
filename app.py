@@ -97,21 +97,12 @@ def show_start_gates(horse_id=91403):
     horse_df = run_horse_query(horse_id, conn)
 
     query = f"""
-    with gates as (
-        select distinct
-            gate
-        from races
-    )
-    
     select
-        gates.gate
-        , count(races.gate) as number_of_starts
-    from gates
-    left join (select * from races where horse_id = {horse_id}) races
-        on gates.gate = races.gate
+        gate
+        , number_of_starts
+    from gate_summary
     where True
-    group by 1
-    limit 100
+        and horse_id = {horse_id}
     """
     gate_df = pd.read_sql_query(query, conn)
 
