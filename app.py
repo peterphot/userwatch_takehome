@@ -74,11 +74,10 @@ def show_classes_callback():
     query = f"""
         select
             class
-            , sum(n_races) as n_races
-        from class_distance_summary
+            , n_races
+        from class_summary
         where True
             and horse_id = {horse_id}
-        group by 1
         order by 1 asc
     """
     return show_horse_visuals(horse_id,
@@ -92,11 +91,10 @@ def show_distances_callback():
     query = f"""
         select
             distance
-            , sum(n_races) as n_races
-        from class_distance_summary
+            , n_races
+        from distance_summary
         where True
             and horse_id = {horse_id}
-        group by 1
         order by 1 asc
     """
     return show_horse_visuals(horse_id,
