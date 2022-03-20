@@ -3,3 +3,4 @@ plotly
 flask
 Gunicorn
 psycopg2
+requests

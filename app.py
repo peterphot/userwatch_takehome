@@ -6,13 +6,14 @@ import plotly.express as px
 import plotly.graph_objects as go
 import psycopg2
 import os
+import requests
 
 app = Flask(__name__)
 
 
 # Utilities
 
-def get_jitsu_key():
+def get_jitsu_js_key():
     if app.debug:
         print(os.environ.get('jitsu_key'))
         return os.environ.get('jitsu_key')
@@ -20,6 +21,23 @@ def get_jitsu_key():
         with open('/etc/secrets/JITSU_KEY') as f:
             jitsu_key = f.readlines()
         return jitsu_key[0]
+
+
+# def get_jitsu_server_key():
+#     if app.debug:
+#         print(os.environ.get('jitsu_server_key'))
+#         return os.environ.get('jitsu_server_key')
+#     else:
+#         with open('/etc/secrets/JITSU_SERVER_KEY') as f:
+#             jitsu_key = f.readlines()
+#         return jitsu_key[0]
+
+
+# def send_jitsu_event(event_details):
+#     jsk = get_jitsu_server_key()
+#     res = requests.post(f'https://t.jitsu.com/api/v1/s2s/event/api/v1/s2s/event?token=${jsk}', json=event_details)
+#     print(res.json())
+
 
 def get_db_conn():
     if app.debug:
@@ -35,7 +53,6 @@ def get_db_conn():
 
 @app.route("/populate_cities_dropdown", methods=["POST", "GET"])
 def populate_cities_dropdown():
-    print('pop')
     if request.method == 'POST':
         country = request.form['country']
         print(country)
@@ -49,6 +66,20 @@ def populate_cities_dropdown():
 @app.route('/search_horse', methods=['POST', 'GET'])
 def search_horse_callback():
     horse_id = request.args.get('horse_id')
+    # event_payload = {
+    #     "event_name": "search_horse",
+    #     "doc_path": "/horses",
+    #     "event_data": {
+    #         'horse_id': horse_id
+    #     },
+    #     "page_ctx": {
+    #         "page_title": "horses",
+    #         "referer": "",
+    #         "url": "localhost"
+    #     }
+    # }
+    # # "https://usrwtchtakehome.onrender.com/search_horse"
+    # send_jitsu_event(event_payload)
     query = f'select * from horses where horse_id = {horse_id}'
     return show_horse_visuals(horse_id, 'table', query, None, None, 'Horse info')
 
@@ -156,7 +187,7 @@ def search_race_result_callback():
 
 @app.route('/')
 def index():
-    return render_template('index.html', jitsu_key=get_jitsu_key())
+    return render_template('index.html', jitsu_key=get_jitsu_js_key())
 
 
 @app.route('/horses')
@@ -165,7 +196,7 @@ def horse_data():
     query = f'select * from horses where horse_id = {horse_id}'
     return render_template('horses.html', summary_table=show_horse_visuals(horse_id, 'table', query,
                                                                            None, None, 'Horse info'),
-                                                                           jitsu_key=get_jitsu_key())
+                           jitsu_key=get_jitsu_js_key())
 
 
 @app.route('/races')
@@ -176,7 +207,7 @@ def race_data():
     race_df = pd.read_sql_query('select distinct class from races_info', conn)
     return render_template('races.html', countries=country_df.values.tolist(),
                            classes=race_df.values.tolist(),
-                           distances=distance_df.values.tolist(), jitsu_key=get_jitsu_key())
+                           distances=distance_df.values.tolist(), jitsu_key=get_jitsu_js_key())
 
 
 # Horse Visuals
@@ -246,7 +277,7 @@ def show_race_info(country, city, race_class, distance):
                    fill_color='lavender',
                    align='left'))
     ])
-    fig.update_layout(title=f'Showing 100 races in {country}, {city}', height=1000)
+    fig.update_layout(title=f'Showing 100 races in {country}, {city}', height=500)
 
     return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 

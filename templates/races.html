@@ -13,6 +13,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
     <script>
             function load_selections(country) {
+                    jitsu('track', 'populate_cities_dropdown', {'params': { 'country': country }});
                     console.log(country);
                     $.ajax({
                         url: "/populate_cities_dropdown",
@@ -36,6 +37,11 @@
             var city = document.getElementById("cities").value;
             var race_class = document.getElementById("class").value;
             var distance = document.getElementById("distance").value;
+
+            jitsu('track', 'search_race_info', {'params': {
+                            'country': country, 'city': city, 'race_class': race_class, 'distance': distance
+                            }});
+
             $.getJSON({
                 url: "/search_race_info", data: { 'country': country, 'city': city, 'class':race_class, 'distance':distance }, success: function (result) {
                     Plotly.newPlot('race_table', result, {staticPlot: true});
@@ -46,6 +52,8 @@
     <script>
             function search_individual_race_result() {
             var race_id = document.getElementById("race_id_field").value;
+
+            jitsu('track', 'search_race_result', {'params': { 'race_id': race_id }});
             $.getJSON({
                 url: "/search_race_result", data: { 'race_id': race_id }, success: function (result) {
                     Plotly.newPlot('individual_race_table', result, {staticPlot: true});
@@ -54,7 +62,7 @@
         }
     </script>
 
-    <title>Races</title>
+<title>Races</title>
 </head>
 <body>
     <h1>Race information</h1>
@@ -100,7 +108,8 @@
             Plotly.newPlot('race_table', d, {});
         </script>
 
-        <h2> Search Race Results</h2>
+        <h2>Search Race Results</h2>
+        <p>To select a race please enter a race id</p>
         <input type="text" id="race_id_field" name="race_id_field">
         <button type="button" onclick="search_individual_race_result()" >Search Race Result</button>
         <div id="individual_race_table" class="chart"></div>

@@ -10,6 +10,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
         function search_horse_callback(selection) {
+            jitsu('track', 'search_horse', {'params': { 'horse_id': selection }});
             $.getJSON({
                 url: "/search_horse", data: { 'horse_id': selection }, success: function (result) {
                     Plotly.newPlot('summary_table', result, {staticPlot: true});
@@ -20,6 +21,7 @@
     <script>
         function show_start_gates_callback() {
             var horse_id = document.getElementById("horse_id_field").value;
+            jitsu('track', 'show_start_gates', {'params': { 'horse_id': horse_id }});
             $.getJSON({
                 url: "/show_start_gates", data: { 'horse_id': horse_id }, success: function (result) {
                     Plotly.newPlot('selected_vis', result, {staticPlot: true});;
@@ -30,6 +32,7 @@
     <script>
         function show_places_callback() {
             var horse_id = document.getElementById("horse_id_field").value;
+            jitsu('track', 'show_places', {'params': { 'horse_id': horse_id }});
             $.getJSON({
                 url: "/show_places", data: { 'horse_id': horse_id }, success: function (result) {
                     Plotly.newPlot('selected_vis', result, {staticPlot: true});;
@@ -40,6 +43,7 @@
     <script>
         function show_class_callback() {
             var horse_id = document.getElementById("horse_id_field").value;
+            jitsu('track', 'show_classes', {'params': { 'horse_id': horse_id }});
             $.getJSON({
                 url: "/show_classes", data: { 'horse_id': horse_id }, success: function (result) {
                     Plotly.newPlot('selected_vis', result, {staticPlot: true});;
@@ -50,6 +54,7 @@
     <script>
         function show_distances_callback() {
             var horse_id = document.getElementById("horse_id_field").value;
+            jitsu('track', 'show_distances', {'params': { 'horse_id': horse_id }});
             $.getJSON({
                 url: "/show_distances", data: { 'horse_id': horse_id }, success: function (result) {
                     Plotly.newPlot('selected_vis', result, {staticPlot: true});;
@@ -60,6 +65,7 @@
     <script>
         function show_earnings_callback() {
             var horse_id = document.getElementById("horse_id_field").value;
+            jitsu('track', 'show_earnings', {'params': { 'horse_id': horse_id }});
             $.getJSON({
                 url: "/show_earnings", data: { 'horse_id': horse_id }, success: function (result) {
                     Plotly.newPlot('selected_vis', result, {staticPlot: true});;
@@ -67,12 +73,13 @@
             });
         }
     </script>
+<title>Horses</title>
 </head>
 
 <body style="font-family:arial, sans-serif">
     <h1>Horse analytics</h1>
     <h2>Choose your horse</h2>
-    <p>To select a horse type in the horse ID</p>
+    <p>To select a horse, type in the horse ID</p>
     <body>A horse ID is any number between 0 and 358847. The best horses are 91403 and 33018.</body>
     <br>
     <input type="number" id="horse_id_field" name="horse_id_field" onchange="search_horse_callback(this.value)", value=91403>
