@@ -12,6 +12,14 @@ app = Flask(__name__)
 
 # Utilities
 
+def get_jitsu_key():
+    if app.debug:
+        print(os.environ.get('jitsu_key'))
+        return os.environ.get('jitsu_key')
+    else:
+        with open('/etc/secrets/JITSU_KEY') as f:
+            jitsu_key = f.readlines()
+        return jitsu_key[0]
 
 def get_db_conn():
     if app.debug:
@@ -148,7 +156,7 @@ def search_race_result_callback():
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', jitsu_key=get_jitsu_key())
 
 
 @app.route('/horses')
