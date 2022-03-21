@@ -231,9 +231,9 @@ def show_race_info(country, city, race_class, distance):
         query = query + f"and country = '{country}'\n"
     if city != "":
         query = query + f"and city = '{city}'\n"
-    if distance != "":
-        query = query + f"and class = '{race_class}'\n"
     if race_class != "":
+        query = query + f"and class = '{race_class}'\n"
+    if distance != "":
         query = query + f"and distance = '{distance}'\n"
 
     query = query + "limit 100"
