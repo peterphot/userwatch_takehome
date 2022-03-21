@@ -100,7 +100,7 @@
 
         <br><br>
 
-        <button type="button" onclick="search_race_info()" >Search Races</button>
+        <button type="button" id="search_race" onclick="search_race_info()" >Search Races</button>
 
         <div id="race_table" class="chart"></div>
         <script>
@@ -111,7 +111,7 @@
         <h2>Search Race Results</h2>
         <p>To select a race please enter a race id</p>
         <input type="text" id="race_id_field" name="race_id_field">
-        <button type="button" onclick="search_individual_race_result()" >Search Race Result</button>
+        <button type="button" id="show_individual_race" onclick="search_individual_race_result()" >Search Race Result</button>
         <div id="individual_race_table" class="chart"></div>
         <script>
                 d = {{ individual_race_table | safe }};

@@ -90,12 +90,12 @@
         Plotly.newPlot('summary_table', d, {});
     </script>
 
-    <button type="button" onclick="show_start_gates_callback()">Show start gate data</button>
-    <button type="button" onclick="show_places_callback()">Show places data</button>
+    <button type="button" id="show_gate" onclick="show_start_gates_callback()">Show start gate data</button>
+    <button type="button" id="show_place" onclick="show_places_callback()">Show places data</button>
 
-    <button type="button" onclick="show_class_callback()">Show race class data</button>
-    <button type="button" onclick="show_distances_callback()">Show race distance data</button>
-    <button type="button" onclick="show_earnings_callback()">Show earnings data</button>
+    <button type="button" id="show_class" onclick="show_class_callback()">Show race class data</button>
+    <button type="button" id="show_distance" onclick="show_distances_callback()">Show race distance data</button>
+    <button type="button" id="show_earnings" onclick="show_earnings_callback()">Show earnings data</button>
     <div id="selected_vis" class="chart"></div>
 
     <script>
