@@ -1,6 +1,6 @@
 create table countries as
 select distinct
     country
-              , city
+    , city
 from races_info
 ;
