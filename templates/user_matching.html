@@ -5,10 +5,14 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <script>
             function match_user() {
-                    $.getJSON({
-                    url: "/match_user", data: { 'data': 1 }, success: function (result) {
-                        console.log(result);
-                    }
+                $.getJSON('http://ip-api.com/json', function(data) {
+                        var ip = data.query;
+                        console.log(ip);
+                        $.getJSON({
+                            url: "/match_user", data: { 'ip_address': ip }, success: function (result) {
+                                console.log(result);
+                            }
+                        });
                 });
             }
         </script>
@@ -18,11 +22,13 @@
         <h1 style="background:lightblue;padding:10px">
             Welcome to user matching
         </h1>
-
+        <br>
         When you press the button below it will match you with other users who have similar interaction patterns.
-
+        <br>
+        <br>
         This can take a minute or 2.
-
+        <br>
+        <br>
         <button type="button" id="match_my_session" onclick="match_user()" >Match me with another user</button>
 
         <div id="user_matches" class="chart"></div>

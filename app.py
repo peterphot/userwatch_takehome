@@ -12,10 +12,6 @@ app = Flask(__name__)
 
 # Utilities
 
-def get_ip_address():
-    print(request.remote_addr+request.environ['REMOTE_ADDR']+request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
-    return request.remote_addr+request.environ['REMOTE_ADDR']+request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
-
 
 def get_jitsu_js_key():
     if app.debug:
@@ -159,7 +155,8 @@ def search_race_result_callback():
 
 @app.route('/match_user', methods=['POST', 'GET'])
 def match_user_callback():
-    return get_ip_address()
+    print(request.args.get('ip_address'))
+    return 'hi'
 
 
 # Pages
