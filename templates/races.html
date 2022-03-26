@@ -33,20 +33,20 @@
     </script>
     <script>
             function search_race_info() {
-            var country = document.getElementById("country").value;
-            var city = document.getElementById("cities").value;
-            var race_class = document.getElementById("class").value;
-            var distance = document.getElementById("distance").value;
+                var country = document.getElementById("country").value;
+                var city = document.getElementById("cities").value;
+                var race_class = document.getElementById("class").value;
+                var distance = document.getElementById("distance").value;
 
-            jitsu('track', 'search_race_info', {'params': {
-                            'country': country, 'city': city, 'race_class': race_class, 'distance': distance
-                            }});
+                jitsu('track', 'search_race_info', {'params': {
+                                'country': country, 'city': city, 'race_class': race_class, 'distance': distance
+                                }});
 
-            $.getJSON({
-                url: "/search_race_info", data: { 'country': country, 'city': city, 'class':race_class, 'distance':distance }, success: function (result) {
-                    Plotly.newPlot('race_table', result, {staticPlot: true});
-                }
-            });
+                $.getJSON({
+                    url: "/search_race_info", data: { 'country': country, 'city': city, 'class':race_class, 'distance':distance }, success: function (result) {
+                        Plotly.newPlot('race_table', result, {staticPlot: true});
+                    }
+                });
         }
     </script>
     <script>

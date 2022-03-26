@@ -12,6 +12,11 @@ app = Flask(__name__)
 
 # Utilities
 
+def get_ip_address():
+    print(request.remote_addr+request.environ['REMOTE_ADDR']+request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
+    return request.remote_addr+request.environ['REMOTE_ADDR']+request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
+
+
 def get_jitsu_js_key():
     if app.debug:
         print(os.environ.get('jitsu_key'))
@@ -152,6 +157,11 @@ def search_race_result_callback():
     return show_race_result(race_id)
 
 
+@app.route('/match_user', methods=['POST', 'GET'])
+def match_user_callback():
+    return get_ip_address()
+
+
 # Pages
 
 
@@ -179,6 +189,10 @@ def race_data():
                            classes=race_df.values.tolist(),
                            distances=distance_df.values.tolist(), jitsu_key=get_jitsu_js_key())
 
+
+@app.route('/user_matching')
+def user_matching():
+    return render_template('user_matching.html')
 
 # Horse Visuals
 

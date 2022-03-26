@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+    <head>
+        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script>
+            function match_user() {
+                    $.getJSON({
+                    url: "/match_user", data: { 'data': 1 }, success: function (result) {
+                        console.log(result);
+                    }
+                });
+            }
+        </script>
+        <title>Welcome to user matching</title>
+    </head>
+    <body style="font-family:arial, sans-serif">
+        <h1 style="background:lightblue;padding:10px">
+            Welcome to user matching
+        </h1>
+
+        When you press the button below it will match you with other users who have similar interaction patterns.
+
+        This can take a minute or 2.
+
+        <button type="button" id="match_my_session" onclick="match_user()" >Match me with another user</button>
+
+        <div id="user_matches" class="chart"></div>
+        <script>
+                d = {{ user_matches | safe }};
+                Plotly.newPlot('user_matches', d, {});
+        </script>
+    </body>
+</html>
