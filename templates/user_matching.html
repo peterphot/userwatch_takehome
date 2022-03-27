@@ -3,10 +3,11 @@
     <head>
         <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
         <script>
             function match_user() {
-                $.getJSON('http://ip-api.com/json', function(data) {
-                        var ip = data.query;
+                $.getJSON("https://api.ipify.org?format=jsonp&callback=?", function(data) {
+                        var ip = data.ip;
                         console.log(ip);
                         $.getJSON({
                             url: "/match_user", data: { 'ip_address': ip }, success: function (result) {
