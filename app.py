@@ -171,6 +171,11 @@ def race_data():
 def user_matching():
     return render_template('user_matching.html')
 
+
+@app.route('/how_it_works')
+def how_it_works():
+    return render_template('how_it_works.html', jitsu_key=get_jitsu_js_key(app))
+
 # Horse Visuals
 
 
