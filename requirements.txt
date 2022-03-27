@@ -4,3 +4,6 @@ flask
 Gunicorn
 psycopg2
 requests
+sklearn
+scipy
+SQLAlchemy

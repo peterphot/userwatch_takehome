@@ -10,7 +10,7 @@
                         console.log(ip);
                         $.getJSON({
                             url: "/match_user", data: { 'ip_address': ip }, success: function (result) {
-                                console.log(result);
+                                Plotly.newPlot('user_matches', result, {staticPlot: true});
                             }
                         });
                 });

@@ -4,8 +4,9 @@ import json
 import plotly
 import plotly.express as px
 import plotly.graph_objects as go
-import psycopg2
-import os
+import dbt_runner
+from utils import get_db_conn, get_jitsu_js_key
+from user_matching import find_user_matches
 
 app = Flask(__name__)
 
@@ -13,34 +14,12 @@ app = Flask(__name__)
 # Utilities
 
 
-def get_jitsu_js_key():
-    if app.debug:
-        print(os.environ.get('jitsu_key'))
-        return os.environ.get('jitsu_key')
-    else:
-        with open('/etc/secrets/JITSU_KEY') as f:
-            jitsu_key = f.readlines()
-        return jitsu_key[0]
-
-
-def get_db_conn():
-    if app.debug:
-        print('debug')
-        return psycopg2.connect(host='singapore-postgres.render.com', database='zed_0t9u', user='zed_user',
-                                password=os.environ.get('render_postgress_pw'))
-    else:
-        print('not debug')
-        with open('/etc/secrets/POSTGRES_CONN_STRING') as f:
-            con_string = f.readlines()
-        return psycopg2.connect(con_string[0])
-
-
 @app.route("/populate_cities_dropdown", methods=["POST", "GET"])
 def populate_cities_dropdown():
     if request.method == 'POST':
         country = request.form['country']
         print(country)
-        conn = get_db_conn()
+        conn = get_db_conn(app)
         country_df = pd.read_sql_query(f"select distinct city from countries where country = '{country}'", conn)
         return jsonify([{c[0]: c[1][0]} for c in zip(['city']*len(country_df.values), country_df.values.tolist())])
 
@@ -155,8 +134,9 @@ def search_race_result_callback():
 
 @app.route('/match_user', methods=['POST', 'GET'])
 def match_user_callback():
-    print(request.args.get('ip_address'))
-    return 'hi'
+    ip_addr = request.args.get('ip_address')
+    dbt_runner.run()
+    return find_user_matches(app, ip_addr)
 
 
 # Pages
@@ -164,7 +144,7 @@ def match_user_callback():
 
 @app.route('/')
 def index():
-    return render_template('index.html', jitsu_key=get_jitsu_js_key())
+    return render_template('index.html', jitsu_key=get_jitsu_js_key(app))
 
 
 @app.route('/horses')
@@ -173,18 +153,18 @@ def horse_data():
     query = f'select * from horses where horse_id = {horse_id}'
     return render_template('horses.html', summary_table=show_horse_visuals(horse_id, 'table', query,
                                                                            None, None, 'Horse info'),
-                           jitsu_key=get_jitsu_js_key())
+                           jitsu_key=get_jitsu_js_key(app))
 
 
 @app.route('/races')
 def race_data():
-    conn = get_db_conn()
+    conn = get_db_conn(app)
     country_df = pd.read_sql_query('select distinct country from countries', conn)
     distance_df = pd.read_sql_query('select distinct distance from races_info', conn)
     race_df = pd.read_sql_query('select distinct class from races_info', conn)
     return render_template('races.html', countries=country_df.values.tolist(),
                            classes=race_df.values.tolist(),
-                           distances=distance_df.values.tolist(), jitsu_key=get_jitsu_js_key())
+                           distances=distance_df.values.tolist(), jitsu_key=get_jitsu_js_key(app))
 
 
 @app.route('/user_matching')
@@ -202,7 +182,7 @@ def show_horse_visuals(horse_id, vis_type, query, x_col, y_col, fig_title):
     horse_id = int(horse_id)
     assert (horse_id >= 0) and (horse_id <= 358847), 'Horse ID must be an integer between 0 and 358847'
 
-    conn = get_db_conn()
+    conn = get_db_conn(app)
 
     horse_df = run_horse_query(horse_id, conn)
     vis_df = pd.read_sql_query(query, conn)
@@ -230,7 +210,7 @@ def show_horse_visuals(horse_id, vis_type, query, x_col, y_col, fig_title):
 
 
 def show_race_info(country, city, race_class, distance):
-    conn = get_db_conn()
+    conn = get_db_conn(app)
 
     query = f"""
         select
@@ -262,8 +242,9 @@ def show_race_info(country, city, race_class, distance):
 
     return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
+
 def show_race_result(race_id):
-    conn = get_db_conn()
+    conn = get_db_conn(app)
 
     query = f"""
         select
