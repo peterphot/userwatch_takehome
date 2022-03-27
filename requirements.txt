@@ -18,7 +18,7 @@ Werkzeug~=2.0.3
 Jinja2~=3.0.3
 click~=8.0.3
 itsdangerous~=2.1.1
-numpy~=1.22.1
+numpy
 setuptools~=60.5.0
 cffi~=1.15.0
 matplotlib~=3.5.1
