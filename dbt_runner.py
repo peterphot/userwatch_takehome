@@ -19,8 +19,10 @@ def get_dbt_keys_ids(app=None):
         return api_key, account_id, job_id
     else:
         api_key = os.environ.get('DBT_API_KEY')
-        account_id = os.environ.get('DBT_ACCOUNT_ID')
-        job_id = os.environ.get('DBT_JOB_ID')
+        account_id = 52946
+            # os.environ.get('DBT_ACCOUNT_ID')
+        job_id = 71371
+            # os.environ.get('DBT_JOB_ID')
         return api_key, account_id, job_id
 
 
