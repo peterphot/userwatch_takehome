@@ -16,7 +16,7 @@ def read_render_files(key_name: str) -> object:
         return f.readlines()[0]
 
 
-def get_dbt_keys_ids(app: object = None) -> str | str | str:
+def get_dbt_keys_ids(app: object = None) -> str:
     """
     Gets secrets for dbt auth from either local or prod
     :param app:
