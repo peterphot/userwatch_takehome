@@ -15,7 +15,12 @@ app = Flask(__name__)
 
 
 @app.route("/populate_cities_dropdown", methods=["POST", "GET"])
-def populate_cities_dropdown():
+def populate_cities_dropdown() -> object:
+    """
+    Gets the value of the country selected in drop down list and generates a list of relevant cities to populate
+    the cities dropdown list.
+    :return: jsonified list of cities
+    """
     if request.method == 'POST':
         country = request.form['country']
         print(country)
@@ -28,14 +33,22 @@ def populate_cities_dropdown():
 
 
 @app.route('/search_horse', methods=['POST', 'GET'])
-def search_horse_callback():
+def search_horse_callback() -> object:
+    """
+    Takes the entered horse id value and gets all horse related information for displaying
+    :return: jsonified plotly table
+    """
     horse_id = request.args.get('horse_id')
     query = f'select * from horses where horse_id = {horse_id}'
     return show_horse_visuals(horse_id, 'table', query, None, None, 'Horse info')
 
 
 @app.route('/show_start_gates', methods=['POST', 'GET'])
-def show_start_gates_callback():
+def show_start_gates_callback() -> object:
+    """
+    Generates figure upon show gates button press
+    :return: jsonified plotly bar chart
+    """
     horse_id = request.args.get('horse_id')
     query = f"""
             select
@@ -51,7 +64,11 @@ def show_start_gates_callback():
 
 
 @app.route('/show_places', methods=['POST', 'GET'])
-def show_places_callback():
+def show_places_callback() -> object:
+    """
+    Generates figure upon show places button press
+    :return: jsonified plotly bar chart
+    """
     horse_id = request.args.get('horse_id')
     query = f"""
             select
@@ -68,7 +85,11 @@ def show_places_callback():
 
 
 @app.route('/show_classes', methods=['POST', 'GET'])
-def show_classes_callback():
+def show_classes_callback() -> object:
+    """
+    Generates figure upon show classes button press
+    :return: jsonified plotly bar chart
+    """
     horse_id = request.args.get('horse_id')
     query = f"""
         select
@@ -85,7 +106,11 @@ def show_classes_callback():
 
 
 @app.route('/show_distances', methods=['POST', 'GET'])
-def show_distances_callback():
+def show_distances_callback() -> object:
+    """
+    Generates figure upon show distances button press
+    :return: jsonified plotly bar chart
+    """
     horse_id = request.args.get('horse_id')
     query = f"""
         select
@@ -102,7 +127,11 @@ def show_distances_callback():
 
 
 @app.route('/show_earnings', methods=['POST', 'GET'])
-def show_earnings_callback():
+def show_earnings_callback() -> object:
+    """
+    Generates figure upon show earnings button press
+    :return: jsonified plotly table
+    """
     horse_id = request.args.get('horse_id')
     query = f"""
         select
@@ -118,7 +147,11 @@ def show_earnings_callback():
 
 
 @app.route('/search_race_info', methods=['POST', 'GET'])
-def search_race_info_callback():
+def search_race_info_callback() -> object:
+    """
+    Extracts data from dropdown menus and generates table of races
+    :return: jsonified plotly table
+    """
     country = request.args.get('country')
     city = request.args.get('city')
     race_class = request.args.get('class')
@@ -127,13 +160,23 @@ def search_race_info_callback():
 
 
 @app.route('/search_race_result', methods=['POST', 'GET'])
-def search_race_result_callback():
+def search_race_result_callback() -> object:
+    """
+    Takes searched race id and makes a table of race results
+    :return: jsonified plotly table
+    """
     race_id = request.args.get('race_id')
     return show_race_result(race_id)
 
 
 @app.route('/match_user', methods=['POST', 'GET'])
-def match_user_callback():
+def match_user_callback() -> object:
+    """
+    Get users IP address.
+    Runs the dbt pipeline.
+    Gets users who have similar interactions with the website.
+    :return: plotly table
+    """
     ip_addr = request.args.get('ip_address')
     dbt_runner.run(app)
     return find_user_matches(app, ip_addr)
@@ -143,12 +186,20 @@ def match_user_callback():
 
 
 @app.route('/')
-def index():
+def index() -> object:
+    """
+    Renders the home page
+    :return: rendered html
+    """
     return render_template('index.html', jitsu_key=get_jitsu_js_key(app))
 
 
 @app.route('/horses')
-def horse_data():
+def horse_data() -> object:
+    """
+    Renders the horse info page
+    :return: rendered html
+    """
     horse_id = 91403
     query = f'select * from horses where horse_id = {horse_id}'
     return render_template('horses.html', summary_table=show_horse_visuals(horse_id, 'table', query,
@@ -157,7 +208,11 @@ def horse_data():
 
 
 @app.route('/races')
-def race_data():
+def race_data() -> object:
+    """
+    Renders the race info page
+    :return: rendered html
+    """
     conn = get_db_conn(app)
     country_df = pd.read_sql_query('select distinct country from countries', conn)
     distance_df = pd.read_sql_query('select distinct distance from races_info', conn)
@@ -168,22 +223,47 @@ def race_data():
 
 
 @app.route('/user_matching')
-def user_matching():
+def user_matching() -> object:
+    """
+    Renders the page for matching users
+    :return: rendered html
+    """
     return render_template('user_matching.html')
 
 
 @app.route('/how_it_works')
-def how_it_works():
+def how_it_works() -> object:
+    """
+    Renders the flow chart page
+    :return: rendered html
+    """
     return render_template('how_it_works.html', jitsu_key=get_jitsu_js_key(app))
 
 # Horse Visuals
 
 
-def run_horse_query(horse_id, conn):
+def run_horse_query(horse_id: int, conn: object) -> pd.DataFrame:
+    """
+    Run query to get horse information
+    :param horse_id: Id of the horse being searched
+    :param conn: postgres connector
+    :return: data frame of horse data
+    """
     return pd.read_sql_query(f'select * from horses where horse_id = {horse_id}', conn)
 
 
-def show_horse_visuals(horse_id, vis_type, query, x_col, y_col, fig_title):
+def show_horse_visuals(horse_id: int, vis_type: str, query: str, x_col: str, y_col: str, fig_title: str) -> object:
+    """
+    Runs a query to extract the queries information then generates a plotly figure to display.
+
+    :param horse_id: Id of the horse being searched
+    :param vis_type: table or bar_chart
+    :param query: Postgres query to get relevant info
+    :param x_col: Name of the column to plot on x axis
+    :param y_col: Name of the column to plot on y axis
+    :param fig_title: title of the figure to display
+    :return: jsonified visualisation object
+    """
     horse_id = int(horse_id)
     assert (horse_id >= 0) and (horse_id <= 358847), 'Horse ID must be an integer between 0 and 358847'
 
@@ -214,7 +294,15 @@ def show_horse_visuals(horse_id, vis_type, query, x_col, y_col, fig_title):
     return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
 
-def show_race_info(country, city, race_class, distance):
+def show_race_info(country: str, city: str, race_class: float, distance: float) -> object:
+    """
+    Takes the request race parameters, builds the postgres query and then generates table for visualising
+    :param country: country queried
+    :param city: city queried
+    :param race_class: race class queried
+    :param distance: race distance queried
+    :return: jsonified visualisation object
+    """
     conn = get_db_conn(app)
 
     query = f"""
@@ -248,7 +336,12 @@ def show_race_info(country, city, race_class, distance):
     return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
 
-def show_race_result(race_id):
+def show_race_result(race_id: str) -> object:
+    """
+    Takes the race ID searched, queries for information and returns table
+    :param race_id: the race identifier
+    :return: jsonified visualisation object
+    """
     conn = get_db_conn(app)
 
     query = f"""

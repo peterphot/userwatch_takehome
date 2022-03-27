@@ -4,21 +4,28 @@ import pandas as pd
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from scipy.spatial.distance import euclidean
-from math import log2, sqrt
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from math import log2
+from sklearn.preprocessing import MinMaxScaler
 from utils import get_db_conn
-import plotly.express as px
 import plotly.graph_objects as go
 
 
-def cross_entropy(p, q):
+def cross_entropy(p: list, q: list) -> float:
     return -sum([q[i]*log2(q[i]/p[i]) for i in range(len(q))])
 
 
-def find_user_matches(app, ip_addr):
+def find_user_matches(app: object, ip_addr: str) -> object:
+    """
+    Takes the users IP address and queries for the most recent user session associated with IP.
+    Then matches that user session to other user sessions using cross entropy and euclidean similarities.
+    Gets information from these sessions and generates plotly table for showing matches
+    :param app:
+    :param ip_addr:
+    :return:
+    """
     conn = get_db_conn(app)
-    vec_means_df = pd.read_sql_query('select * from detect.vector_means', conn)
-    vec_means_df = vec_means_df.set_index('cluster_id')
+    # vec_means_df = pd.read_sql_query('select * from detect.vector_means', conn)
+    # vec_means_df = vec_means_df.set_index('cluster_id')
     match_vec_query = f"""
                         select
                           *
@@ -39,7 +46,7 @@ def find_user_matches(app, ip_addr):
     matching_df['n_vector'] = matching_df['n_vector'].apply(lambda x: np.asarray(x, dtype=float))
     closest_clusters = [np.argmax(cosine_similarity(row['prop_vector'].reshape(1, -1), vec_means_df.to_numpy())) for i, row in matching_df.iterrows()]
     matching_df['closest_cluster'] = closest_clusters
-    # search_ci = matching_df.loc[0, 'closest_cluster']
+
     population_query = f"""
                         select
                             av.session_id

@@ -6,12 +6,22 @@ from datetime import datetime, timedelta
 import dateutil.parser as parser
 
 
-def read_render_files(key_name):
+def read_render_files(key_name: str) -> object:
+    """
+    Used for getting secrets from prod environment for authorising dbt api
+    :param key_name: name of the key file
+    :return: secret string
+    """
     with open(f'/etc/secrets/{key_name}') as f:
         return f.readlines()[0]
 
 
-def get_dbt_keys_ids(app=None):
+def get_dbt_keys_ids(app: object = None) -> str | str | str:
+    """
+    Gets secrets for dbt auth from either local or prod
+    :param app:
+    :return:
+    """
     if app is not None and not app.debug:
         api_key = read_render_files('DBT_API_KEY')
         account_id = read_render_files('DBT_ACCOUNT_ID')
@@ -33,7 +43,14 @@ class DbtJobRunStatus(enum.IntEnum):
     CANCELLED = 30
 
 
-def trigger_job(API_KEY, ACCOUNT_ID, JOB_ID) -> int:
+def trigger_job(API_KEY: str, ACCOUNT_ID: int, JOB_ID: int) -> int:
+    """
+    Triggers a dbt job to run
+    :param API_KEY: dbt api key
+    :param ACCOUNT_ID: account id for relevant project
+    :param JOB_ID: job id to trigger
+    :return: id of the triggered run
+    """
     res = requests.post(
         url=f"https://cloud.getdbt.com/api/v2/accounts/{ACCOUNT_ID}/jobs/{JOB_ID}/run/",
         headers={'Authorization': f"Token {API_KEY}"},
@@ -52,7 +69,14 @@ def trigger_job(API_KEY, ACCOUNT_ID, JOB_ID) -> int:
     return response_payload['data']['id']
 
 
-def get_job_run_status(job_run_id, API_KEY, ACCOUNT_ID):
+def get_job_run_status(job_run_id: int, API_KEY: str, ACCOUNT_ID: int) -> str:
+    """
+    gets status of a run
+    :param job_run_id: Id of the job run
+    :param API_KEY: dbt api key
+    :param ACCOUNT_ID: account id for relevant project
+    :return: run status
+    """
     res = requests.get(
         url=f"https://cloud.getdbt.com/api/v2/accounts/{ACCOUNT_ID}/runs/{job_run_id}/",
         headers={'Authorization': f"Token {API_KEY}"},
@@ -63,18 +87,30 @@ def get_job_run_status(job_run_id, API_KEY, ACCOUNT_ID):
     return response_payload['data']['status']
 
 
-def get_runs(API_KEY, ACCOUNT_ID):
+def get_runs(API_KEY: str, ACCOUNT_ID: int) -> list:
+    """
+    get dbt run history for account
+    :param API_KEY: dbt api key
+    :param ACCOUNT_ID: account id for relevant project
+    :return: run history
+    """
     res = requests.get(
         url=f"https://cloud.getdbt.com/api/v2/accounts/{ACCOUNT_ID}/runs/",
         headers={'Authorization': f"Token {API_KEY}"},
     )
-
     res.raise_for_status()
     response_payload = res.json()
     return response_payload['data']
 
 
-def get_job_status(API_KEY, ACCOUNT_ID, JOB_ID):
+def get_job_status(API_KEY: str, ACCOUNT_ID: int, JOB_ID: int) -> int:
+    """
+    gets current status of the job
+    :param API_KEY: dbt api key
+    :param ACCOUNT_ID: account id for relevant project
+    :param JOB_ID: job id to trigger
+    :return: current job state
+    """
     res = requests.get(
         url=f"https://cloud.getdbt.com/api/v2/accounts/{ACCOUNT_ID}/jobs/{JOB_ID}/",
         headers={'Authorization': f"Token {API_KEY}"},
@@ -85,7 +121,13 @@ def get_job_status(API_KEY, ACCOUNT_ID, JOB_ID):
     return response_payload['data']['state']
 
 
-def run(app):
+def run(app: object) -> str:
+    """
+    Checks the job isn't currently running and hasn't run recently.
+    If criteria are satisfied runs dbt job and polls for status.
+    :param app: web app object for determining whether or not it is running locally or in prod
+    :return: success of run
+    """
     api_key, account_id, job_id = get_dbt_keys_ids(app)
     run_log = get_runs(api_key, account_id)
     last_run_time = [i['finished_at'] for i in run_log][-1]
@@ -114,3 +156,5 @@ def run(app):
 
 if __name__ == '__main__':
     run()
+
+#%%

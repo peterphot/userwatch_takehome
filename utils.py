@@ -2,7 +2,12 @@ import psycopg2
 import os
 
 
-def get_jitsu_js_key(app):
+def get_jitsu_js_key(app: object) -> str:
+    """
+    Extract API secret from either local or prod
+    :param app: web app object for determining whether or not it is running locally or in prod
+    :return: the api key for jitsu integration
+    """
     if app.debug:
         print(os.environ.get('jitsu_key'))
         return os.environ.get('jitsu_key')
@@ -12,7 +17,12 @@ def get_jitsu_js_key(app):
         return jitsu_key[0]
 
 
-def get_db_conn(app=None):
+def get_db_conn(app: object = None) -> object:
+    """
+    Gets PostgresDB connector
+    :param app: web app object for determining whether or not it is running locally or in prod
+    :return: Postgres connector
+    """
     if app is None or app.debug:
         print('debug')
         return psycopg2.connect(host='singapore-postgres.render.com', database='zed_0t9u', user='zed_user',
