@@ -85,8 +85,8 @@ def get_job_status(API_KEY, ACCOUNT_ID, JOB_ID):
     return response_payload['data']['state']
 
 
-def run():
-    api_key, account_id, job_id = get_dbt_keys_ids()
+def run(app):
+    api_key, account_id, job_id = get_dbt_keys_ids(app)
     run_log = get_runs(api_key, account_id)
     last_run_time = [i['finished_at'] for i in run_log][-1]
 

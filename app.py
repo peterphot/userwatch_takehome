@@ -135,7 +135,7 @@ def search_race_result_callback():
 @app.route('/match_user', methods=['POST', 'GET'])
 def match_user_callback():
     ip_addr = request.args.get('ip_address')
-    dbt_runner.run()
+    dbt_runner.run(app)
     return find_user_matches(app, ip_addr)
 
 
@@ -170,6 +170,11 @@ def race_data():
 @app.route('/user_matching')
 def user_matching():
     return render_template('user_matching.html')
+
+
+@app.route('/how_it_works')
+def how_it_works():
+    return render_template('how_it_works.html', jitsu_key=get_jitsu_js_key(app))
 
 # Horse Visuals
 

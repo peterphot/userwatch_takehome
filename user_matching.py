@@ -37,9 +37,9 @@ def find_user_matches(app, ip_addr):
 
     matching_df['prop_vector'] = matching_df['prop_vector'].apply(lambda x: np.asarray(x, dtype=float))
     matching_df['n_vector'] = matching_df['n_vector'].apply(lambda x: np.asarray(x, dtype=float))
-    closest_clusters = [np.argmax(cosine_similarity(row['prop_vector'].reshape(1,-1), vec_means_df.to_numpy())) for i, row in matching_df.iterrows()]
+    closest_clusters = [np.argmax(cosine_similarity(row['prop_vector'].reshape(1, -1), vec_means_df.to_numpy())) for i, row in matching_df.iterrows()]
     matching_df['closest_cluster'] = closest_clusters
-    search_ci = matching_df.loc[0, 'closest_cluster']
+    # search_ci = matching_df.loc[0, 'closest_cluster']
     population_query = f"""
                         select
                             av.session_id
@@ -82,6 +82,7 @@ def find_user_matches(app, ip_addr):
                    align='left'))
     ])
     cnt = vis_df.shape[0]
-    fig.update_layout(title=f'Your ({ip_addr}) most recent session matches with the following {cnt} other user sessions')
+    dt = matching_df.loc[0, 'session_start_local_time']
+    fig.update_layout(title=f'Your ({ip_addr}) most recent session ({dt}) matches with the following {cnt} other user sessions')
 
     return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
