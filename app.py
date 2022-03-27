@@ -135,7 +135,7 @@ def search_race_result_callback():
 @app.route('/match_user', methods=['POST', 'GET'])
 def match_user_callback():
     ip_addr = request.args.get('ip_address')
-    dbt_runner.run()
+    dbt_runner.run(app)
     return find_user_matches(app, ip_addr)
 
 

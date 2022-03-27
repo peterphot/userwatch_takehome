@@ -19,10 +19,8 @@ def get_dbt_keys_ids(app=None):
         return api_key, account_id, job_id
     else:
         api_key = os.environ.get('DBT_API_KEY')
-        account_id = 52946
-            # os.environ.get('DBT_ACCOUNT_ID')
-        job_id = 71371
-            # os.environ.get('DBT_JOB_ID')
+        account_id = os.environ.get('DBT_ACCOUNT_ID')
+        job_id = os.environ.get('DBT_JOB_ID')
         return api_key, account_id, job_id
 
 
@@ -87,8 +85,8 @@ def get_job_status(API_KEY, ACCOUNT_ID, JOB_ID):
     return response_payload['data']['state']
 
 
-def run():
-    api_key, account_id, job_id = get_dbt_keys_ids()
+def run(app):
+    api_key, account_id, job_id = get_dbt_keys_ids(app)
     run_log = get_runs(api_key, account_id)
     last_run_time = [i['finished_at'] for i in run_log][-1]
 
