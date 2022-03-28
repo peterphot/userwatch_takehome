@@ -44,8 +44,8 @@ def find_user_matches(app: object, ip_addr: str) -> object:
 
     matching_df['prop_vector'] = matching_df['prop_vector'].apply(lambda x: np.asarray(x, dtype=float))
     matching_df['n_vector'] = matching_df['n_vector'].apply(lambda x: np.asarray(x, dtype=float))
-    closest_clusters = [np.argmax(cosine_similarity(row['prop_vector'].reshape(1, -1), vec_means_df.to_numpy())) for i, row in matching_df.iterrows()]
-    matching_df['closest_cluster'] = closest_clusters
+    # closest_clusters = [np.argmax(cosine_similarity(row['prop_vector'].reshape(1, -1), vec_means_df.to_numpy())) for i, row in matching_df.iterrows()]
+    # matching_df['closest_cluster'] = closest_clusters
 
     population_query = f"""
                         select
